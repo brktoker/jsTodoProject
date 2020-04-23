@@ -10,18 +10,78 @@ const secondCardBody = document.querySelectorAll(".card-body")[1]
 const filter = document.querySelector("#filter")
 const clearButton = document.querySelector("#clear-todos")
 
-eventListener()
+eventListeners()
 
-function eventListener() {
+function eventListeners() {
 
     form.addEventListener("submit", addTodo)
-    document.addEventListener("DOMContentLoaded",loadAllTodosToUI)
+    document.addEventListener("DOMContentLoaded", loadAllTodosToUI)
+    secondCardBody.addEventListener("click", deleteTodo)
+    filter.addEventListener("keyup",filterTodo)
+    clearButton.addEventListener("click",clearAllTodos)
 }
 
-function loadAllTodosToUI(){
+function clearAllTodos(){
+
+    if(confirm("Tümünü silmek istediğinize emin misiniz?")){
+
+        while(todoList.firstElementChild != null){
+            todoList.removeChild(todoList.firstElementChild)
+        }
+        localStorage.removeItem("todos")
+    }
+}
+
+function deleteTodo(e) {
+
+    //console.log(e.target.parentElement.parentElement.textContent)
+
+    if (e.target.className === "fa fa-remove") {
+        e.target.parentElement.parentElement.remove()
+        deleteTodoFromStorage(e.target.parentElement.parentElement.textContent)
+        showAlert("warning", `${e.target.parentElement.parentElement.textContent} "silindi"`)
+    }
+}
+
+function filterTodo(e){
+
+    const filterValue = e.target.value.toLowerCase()
+    const listItems = document.querySelectorAll(".list-group-item")
+
+    listItems.forEach(function(listItem){
+        const text = listItem.textContent.toLowerCase()
+
+        if(text.indexOf(filterValue) === -1){
+            listItem.setAttribute("style","display : none !important")
+            
+        }
+        else{
+            listItem.setAttribute("style","display : block")
+            
+
+        }
+        
+    })
+}
+
+function deleteTodoFromStorage(deleteTodo) {
+
     let todos = getTodosFromStorage()
-    
-    todos.forEach(function(todo){
+
+    todos.forEach(function (todo, index) {
+
+        if (todo === deleteTodo) {
+            console.log(index)
+            todos.splice(index, 1)
+        }
+        localStorage.setItem("todos", JSON.stringify(todos))
+    })
+}
+
+function loadAllTodosToUI() {
+    let todos = getTodosFromStorage()
+
+    todos.forEach(function (todo) {
         addUITodo(todo)
     })
 
@@ -46,7 +106,7 @@ function addTodo(e) {
     e.preventDefault();//page is not refreshed 
 }
 
-function getTodosFromStorage(){
+function getTodosFromStorage() {
     let todos
 
     if (localStorage.getItem("todos") === null) {
@@ -59,13 +119,13 @@ function getTodosFromStorage(){
 }
 
 
-function addTodoToStorage(newTodo){
+function addTodoToStorage(newTodo) {
 
     let todos = getTodosFromStorage()
 
     todos.push(newTodo)
 
-    localStorage.setItem("todos",JSON.stringify(todos))
+    localStorage.setItem("todos", JSON.stringify(todos))
 
 }
 
